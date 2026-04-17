@@ -1,153 +1,152 @@
 # HermesMenuBar
 
-macOS 菜单栏聊天应用 - 直接连接 Hermes AI 助手
+[中文说明 / Chinese README](README_CN.md)
 
-## 功能特点
+HermesMenuBar is a native macOS menu bar chat client that connects directly to the local Hermes AI assistant.
 
-- 🚀 **菜单栏常驻** - 点击 💬 图标快速打开聊天窗口
-- 💬 **流式输出** - 实时显示 AI 回复，打字机效果
-- 📁 **Session 管理** - 搜索、置顶、归档、删除、重命名对话
-- 🖼️ **图片附件** - 直接附加图片，让 Hermes 分析截图和视觉内容
-- 📝 **Markdown 渲染** - 更适合代码块、列表和长回复阅读
-- 💾 **文件持久化** - 自动保存到 Application Support，下次打开依然保留
-- 🔗 **ACP 协议** - 直接连接本地 Hermes CLI 进程
-- ⚡ **原生 Swift** - 使用 SwiftUI 构建，性能优异
+## Features
 
-## 系统要求
+- 🚀 **Always in the menu bar** - Open the chat window instantly from the macOS menu bar
+- 💬 **Streaming responses** - See replies appear in real time
+- 📁 **Session management** - Search, pin, archive, delete, and rename conversations
+- 🖼️ **Image attachments** - Attach images and let Hermes inspect screenshots and visual references
+- 📝 **Markdown rendering** - Better readability for code blocks, lists, and longer replies
+- 💾 **File-based persistence** - Sessions are stored in Application Support and restored automatically
+- 🔗 **ACP integration** - Connect directly to the local Hermes CLI process
+- ⚡ **Native Swift UI** - Built with SwiftUI for a lightweight macOS-native experience
+
+## Requirements
 
 - macOS 14.0+
-- Hermes CLI 已安装 (`~/.local/bin/hermes`)
+- Hermes CLI installed, typically at `~/.local/bin/hermes`
 
-## 安装
+## Installation
 
-### 方法一：直接运行
+### Option 1: Run directly
 ```bash
 cd ~/Documents/HermesMenuBar
 ./start.sh
 ```
-脚本会先构建当前源码，再打开 `build/HermesMenuBar.app`。
+This script builds the latest source and opens `build/HermesMenuBar.app`.
 
-### 方法二：安装到 Applications
+### Option 2: Install to Applications
 ```bash
 cd ~/Documents/HermesMenuBar
 ./install.sh
 ```
-脚本会先构建当前源码，再把最新 app 安装到 `~/Applications`。
+This script builds the latest source and installs the app into `~/Applications`.
 
-### 方法三：手动安装
-1. 下载 `HermesMenuBar-1.0.0.zip`
-2. 解压到任意位置
-3. 将 `HermesMenuBar.app` 拖到 Applications 文件夹
+### Option 3: Drag-install from a packaged archive
+1. Download `HermesMenuBar-1.0.0.zip`
+2. Extract it anywhere
+3. Drag `HermesMenuBar.app` into the Applications folder
 
-## 使用说明
+## Usage
 
-### 基本操作
+### Basic actions
 
-| 操作 | 说明 |
+| Action | Description |
 |------|------|
-| 打开/关闭 | 点击菜单栏 💬 图标 |
-| 发送消息 | 底部输入框输入，点击 Send 或按 Enter |
-| 插入换行 | Shift + Enter |
-| 添加图片 | 底部输入区点击 Image，或直接拖拽图片 |
-| 新建 Session | 齿轮图标 → New Session |
-| 切换 Session | 左侧 Session 列表点击切换 |
-| 搜索 Session | 左侧搜索框实时过滤 |
-| 置顶 / 归档 | Session 卡片上点击对应图标 |
-| 删除 Session | Session 卡片上点击 🗑️ |
-| 重命名 Session | Session 卡片上点击 ✏️ |
-| 清空消息 | 齿轮图标 → Clear Messages |
-| 取消生成 | 点击红色 ⏹ 按钮 |
-| 退出应用 | 齿轮图标 → Quit |
+| Open / Close | Click the 💬 menu bar icon |
+| Send a message | Type in the composer and click `Send` or press `Enter` |
+| Insert a newline | Press `Shift + Enter` |
+| Attach an image | Click `Image` in the composer or drag an image into the input area |
+| Create a session | `New Session` |
+| Switch sessions | Click a session in the left sidebar |
+| Search sessions | Use the search field in the left sidebar |
+| Pin / Archive | Use the session card action icons |
+| Delete a session | Use the trash icon on the session card |
+| Rename a session | Use the pencil icon on the session card |
+| Clear messages | `Clear Messages` |
+| Cancel generation | Click the red `Stop` button |
+| Quit the app | `Quit` |
 
-### Session 管理
+### Session model
 
-应用支持多个 Session，每个 Session 有独立的对话历史：
+Each session stores its own conversation history and can be independently pinned, archived, synced with ACP, or deleted.
 
-1. **新建 Session**: 创建新的对话上下文
-2. **切换 Session**: 在不同对话间快速切换
-3. **删除 Session**: 删除不需要的对话
-4. **重命名 Session**: 给 Session 起个有意义的名字
+## Technical Overview
 
-## 技术实现
+### ACP flow
 
-### ACP 协议
+The app talks to Hermes through ACP (Agent Communication Protocol):
 
-应用通过 ACP (Agent Communication Protocol) 与 Hermes 通信：
+1. Start a local `hermes acp` subprocess
+2. Initialize the ACP connection
+3. Send prompts through `session/prompt`
+4. Stream JSON-RPC updates back into the UI
+5. Optionally sync GUI sessions with Hermes ACP sessions
 
-1. 启动 `hermes acp` 子进程
-2. 发送 `initialize` 请求建立连接
-3. 使用 `session/prompt` 发送消息，并为每个本地 session 绑定独立 ACP session
-4. 接收流式 JSON-RPC 响应，并实时更新对应会话
+### Storage
 
-### 数据存储
+- Sessions and messages are stored as JSON files in Application Support
+- Attached images are copied into the app data directory
+- The app restores previous state automatically on launch
 
-- Session 和消息保存在 Application Support 下的 JSON 文件
-- 附件图片会复制到应用数据目录中
-- 应用重启后自动恢复
+## Troubleshooting
 
-## 故障排除
+### The app will not open
+**Problem:** macOS says the developer cannot be verified.
 
-### 应用无法打开
-**问题**: 系统提示"无法验证开发者"
+**Fix:**
+1. Open `System Settings`
+2. Go to `Privacy & Security`
+3. Find the HermesMenuBar warning
+4. Choose `Open Anyway`
 
-**解决**: 
-1. 前往 系统设置 → 隐私与安全性 → 安全性
-2. 找到 HermesMenuBar 相关提示
-3. 点击"仍要打开"
+### Hermes does not respond
+**Problem:** Sending a message produces no reply.
 
-### 无法连接到 Hermes
-**问题**: 发送消息后无响应
-
-**检查**:
+**Checks:**
 ```bash
-# 确认 Hermes 已安装
+# Verify Hermes is installed
 which hermes
 
-# 确认 Hermes 支持 ACP
+# Verify ACP support exists
 hermes acp --help
 
-# 测试 ACP 是否正常工作
+# Send a minimal initialize request
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocol_version":1}}' | hermes acp
 ```
 
-### 菜单栏图标不显示
-**问题**: 应用运行但看不到图标
+### The menu bar icon is missing
+**Problem:** The app is running but you cannot see the icon.
 
-**解决**:
-- 检查屏幕右上角是否被其他图标挤到左侧
-- 尝试点击菜单栏空白区域
-- 检查系统设置 → 控制中心，确认 HermesMenuBar 未被隐藏
+**Fix:**
+- Check whether other menu bar icons pushed it out of view
+- Click empty menu bar space to reflow icons
+- Check `System Settings > Control Center` to make sure HermesMenuBar is not hidden
 
-## 开发
+## Development
 
-### 构建
+### Build
 ```bash
 swift build -c release
 ```
 
-### 项目结构
-```
+### Project layout
+```text
 HermesMenuBar/
-├── HermesMenuBar/           # 源代码
+├── HermesMenuBar/           # Source code
 │   ├── HermesMenuBarApp.swift
-│   ├── Models/              # 数据模型
-│   ├── Views/               # SwiftUI 视图
-│   ├── ViewModels/          # 视图模型
-│   └── Services/            # 服务层
-│       └── ACPClient.swift  # ACP 协议客户端
-├── Package.swift            # Swift Package 配置
+│   ├── Models/              # Data models
+│   ├── Views/               # SwiftUI views
+│   ├── ViewModels/          # View models
+│   └── Services/            # Service layer
+│       └── ACPClient.swift  # ACP client
+├── Package.swift            # Swift Package configuration
 └── README.md
 ```
 
-## 更新日志
+## Changelog
 
 ### v1.0.0
-- 初始版本
-- 菜单栏常驻应用
-- Session 管理
-- ACP 协议支持
-- 流式消息输出
+- Initial release
+- Native menu bar app
+- Session management
+- ACP support
+- Streaming responses
 
-## 许可证
+## License
 
 MIT License

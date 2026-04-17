@@ -19,10 +19,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var chatViewModel: ChatViewModel?
     
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // 延迟初始化 ViewModel
+        // Initialize the view model after launch
         chatViewModel = ChatViewModel()
         
-        // 创建菜单栏图标
+        // Create the menu bar icon
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem?.button {
@@ -33,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             button.target = self
         }
         
-        // 创建弹出窗口
+        // Create the popover window
         if let viewModel = chatViewModel {
             popover = NSPopover()
             popover?.contentSize = NSSize(width: 1040, height: 760)

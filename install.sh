@@ -1,5 +1,5 @@
 #!/bin/bash
-# HermesMenuBar 安装脚本
+# HermesMenuBar installer
 
 set -euo pipefail
 
@@ -10,70 +10,70 @@ TARGET_DIR="$HOME/Applications"
 SOURCE_APP="${SOURCE_DIR}/build/${APP_BUNDLE}"
 
 echo "========================================"
-echo "  HermesMenuBar 安装程序"
+echo "  HermesMenuBar Installer"
 echo "========================================"
 echo ""
 
-echo "🔨 先构建最新版本..."
+echo "🔨 Building the latest version first..."
 "${SOURCE_DIR}/build_app.sh"
 
-# 检查应用是否存在
+# Verify that the app bundle exists
 if [ ! -d "${SOURCE_APP}" ]; then
-    echo "❌ 错误: 找不到 ${SOURCE_APP}"
+    echo "❌ Error: ${SOURCE_APP} was not found"
     exit 1
 fi
 
-# 创建 Applications 目录（如果不存在）
+# Create the Applications directory if needed
 if [ ! -d "$TARGET_DIR" ]; then
-    echo "📁 创建 ${TARGET_DIR} 目录..."
+    echo "📁 Creating ${TARGET_DIR}..."
     mkdir -p "$TARGET_DIR"
 fi
 
-# 检查是否已存在
+# Check whether the app is already installed
 if [ -d "${TARGET_DIR}/${APP_BUNDLE}" ]; then
-    echo "⚠️  ${APP_NAME} 已安装在 ${TARGET_DIR}"
-    read -p "是否覆盖? (y/N): " -n 1 -r
+    echo "⚠️  ${APP_NAME} is already installed in ${TARGET_DIR}"
+    read -p "Overwrite it? (y/N): " -n 1 -r
     echo
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "❌ 安装已取消"
+        echo "❌ Installation cancelled"
         exit 0
     fi
-    echo "🗑️  删除旧版本..."
+    echo "🗑️  Removing the previous version..."
     rm -rf "${TARGET_DIR}/${APP_BUNDLE}"
 fi
 
-# 复制应用
-echo "📦 安装 ${APP_NAME}..."
+# Copy the app bundle
+echo "📦 Installing ${APP_NAME}..."
 cp -R "${SOURCE_APP}" "$TARGET_DIR/"
 
-# 设置权限
+# Ensure the executable bit is set
 chmod +x "${TARGET_DIR}/${APP_BUNDLE}/Contents/MacOS/${APP_NAME}"
 
 echo ""
-echo "✅ 安装完成!"
+echo "✅ Installation complete!"
 echo ""
-echo "📍 安装位置: ${TARGET_DIR}/${APP_BUNDLE}"
+echo "📍 Installed to: ${TARGET_DIR}/${APP_BUNDLE}"
 echo ""
-echo "🚀 启动方式:"
-echo "   1. 打开 Launchpad，点击 HermesMenuBar 图标"
-echo "   2. 或按 Cmd+Space 打开 Spotlight，搜索 'HermesMenuBar'"
-echo "   3. 或直接运行: open '${TARGET_DIR}/${APP_BUNDLE}'"
+echo "🚀 Launch options:"
+echo "   1. Open Launchpad and click HermesMenuBar"
+echo "   2. Press Cmd+Space and search for HermesMenuBar"
+echo "   3. Run: open '${TARGET_DIR}/${APP_BUNDLE}'"
 echo ""
-echo "💡 提示:"
-echo "   - 首次运行时，系统可能会提示'无法验证开发者'"
-echo "   - 请前往 系统设置 → 隐私与安全性 → 安全性，点击'仍要打开'"
-echo "   - 应用会在菜单栏显示 💬 图标"
+echo "💡 Notes:"
+echo "   - On first launch, macOS may warn that the developer cannot be verified"
+echo "   - Go to System Settings → Privacy & Security and choose Open Anyway if needed"
+echo "   - The app shows a 💬 icon in the menu bar"
 echo ""
 
-# 询问是否立即启动
-read -p "是否立即启动 ${APP_NAME}? (Y/n): " -n 1 -r
+# Ask whether to launch immediately
+read -p "Launch ${APP_NAME} now? (Y/n): " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Nn]$ ]]; then
     if pgrep -x "${APP_NAME}" >/dev/null 2>&1; then
-        echo "🛑 正在关闭旧版本进程..."
+        echo "🛑 Closing the currently running instance..."
         pkill -x "${APP_NAME}" || true
         sleep 1
     fi
-    echo "🚀 正在启动 ${APP_NAME}..."
+    echo "🚀 Launching ${APP_NAME}..."
     open -n "${TARGET_DIR}/${APP_BUNDLE}"
 fi
