@@ -1,0 +1,7 @@
+.build/
+build/
+dist/
+HermesMenuBar.app/
+.hermes/
+.omx/
+.DS_Store
